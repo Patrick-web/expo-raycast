@@ -17,3 +17,6 @@ export const baseHeaders = {
 };
 
 export const BASE_URL = "https://api.expo.dev/graphql";
+
+export const ExpoIcon = "https://static.expo.dev/static/favicons/favicon-dark-48x48.png";
+export const GithubIcon = "https://github.githubassets.com/assets/GitHub-Mark-ea2971cee799.png";
