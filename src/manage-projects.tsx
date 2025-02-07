@@ -42,9 +42,6 @@ export default function Command() {
 
       return data[0].data.account.byName.appsPaginated.edges;
     },
-    onData: (data) => {
-      console.log(data);
-    },
     onError: (error) => {
       console.log(error);
       showToast({
@@ -70,6 +67,7 @@ export default function Command() {
         <>
           {data.map((project) => (
             <List.Item
+              key={project.node.id}
               icon={
                 project.node.iconUrl
                   ? {

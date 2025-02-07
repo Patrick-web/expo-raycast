@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { BASE_URL, ExpoIcon } from "../lib/constants";
 import { ProjectTimelineResponse, ErrorResponse, ProjectActivity } from "../lib/types";
 import { getAuthHeaders, changeCase } from "../lib/utils";
-import BuildDetails from "./BuiildDetails";
+import BuildDetails from "./BuildDetails";
 
 export default function ProjectTimeline({ appFullName }: { appFullName: string }) {
   const [headers, setHeaders] = useState<Record<string, string> | null>(null);
@@ -38,9 +38,6 @@ export default function ProjectTimeline({ appFullName }: { appFullName: string }
       }
 
       return data[0].data.app.byFullName?.timelineActivity.edges || [];
-    },
-    onData: (data) => {
-      console.log(data);
     },
     onError: (error) => {
       console.log(error);
@@ -112,6 +109,7 @@ export default function ProjectTimeline({ appFullName }: { appFullName: string }
           {data.map((project) => (
             <List.Item
               id={project.node.id}
+              key={project.node.id}
               icon={{
                 source:
                   project.node.__typename === "Build"

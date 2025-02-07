@@ -1,4 +1,4 @@
-import { showToast, Toast, ActionPanel, Action, Detail, ListItem, List } from "@raycast/api";
+import { showToast, Toast, ActionPanel, Detail, List, Action, Icon } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { BASE_URL } from "../lib/constants";
@@ -6,6 +6,7 @@ import { ErrorResponse } from "../lib/types";
 import { getAuthHeaders } from "../lib/utils";
 import { Build, BuildDetailsResponse } from "../lib/types/build-details.types";
 import generateBuildMarkdown from "../lib/markdown/generateBuildMarkdown";
+import LogsViewer from "./LogsViewer";
 
 export default function BuildDetails({ buildId }: { buildId: string }) {
   const [headers, setHeaders] = useState<Record<string, string> | null>(null);
@@ -31,13 +32,10 @@ export default function BuildDetails({ buildId }: { buildId: string }) {
       if ("errors" in data) {
         const errorMessages = (data as ErrorResponse).errors.map((error) => error.message).join(", ");
         showToast({ title: "Error Fetching Project Builds", message: errorMessages, style: Toast.Style.Failure });
-        return [];
+        return null;
       }
 
       return data[0].data.builds.byId;
-    },
-    onData: (data) => {
-      console.log(data);
     },
     onError: (error) => {
       console.log(error);
@@ -47,7 +45,7 @@ export default function BuildDetails({ buildId }: { buildId: string }) {
         style: Toast.Style.Failure,
       });
     },
-    initialData: [],
+    initialData: null,
   });
 
   useEffect(() => {
@@ -59,6 +57,9 @@ export default function BuildDetails({ buildId }: { buildId: string }) {
   }, []);
 
   function getExpoLink(build: Build) {
+    if (!build || !build.__typename) {
+      return "https://expo.dev";
+    }
     const link = `https://expo.dev/accounts/${build.app.ownerAccount?.name}/projects/${build.app.name}/${build.__typename}s/${build.id}`;
     return link.toLowerCase();
   }
@@ -74,7 +75,10 @@ export default function BuildDetails({ buildId }: { buildId: string }) {
       markdown={data ? generateBuildMarkdown(data) : ""}
       actions={
         <ActionPanel>
-          {/* <Action.OpenInBrowser title="View on Expo" url={getExpoLink(data)} icon={"expo.png"} /> */}
+          {data && (
+            <Action.Push title="View Logs" icon={Icon.AppWindowList} target={<LogsViewer logFiles={data.logFiles} />} />
+          )}
+          {data && <Action.OpenInBrowser title="View on Expo" url={getExpoLink(data)} icon={"expo.png"} />}
         </ActionPanel>
       }
     />

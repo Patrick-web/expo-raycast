@@ -36,9 +36,6 @@ export default function ProjectBuilds({ appFullName }: { appFullName: string }) 
 
       return data[0].data.app.byFullName?.updatesPaginated.edges || [];
     },
-    onData: (data) => {
-      console.log(data);
-    },
     onError: (error) => {
       console.log(error);
       showToast({

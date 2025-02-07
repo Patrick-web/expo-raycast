@@ -1,11 +1,11 @@
-import { showToast, Toast, Color, List, Icon, ActionPanel, Action, Detail, ImageMask } from "@raycast/api";
+import { showToast, Toast, Color, List, Icon, ActionPanel, Action, ImageMask } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { BASE_URL, ExpoIcon } from "../lib/constants";
 import { ErrorResponse } from "../lib/types";
 import { ProjectBuildsResponse, ProjectBuild } from "../lib/types/project-builds.types";
 import { getAuthHeaders, changeCase } from "../lib/utils";
-import BuildDetails from "./BuiildDetails";
+import BuildDetails from "./BuildDetails";
 
 export default function ProjectBuilds({ appFullName }: { appFullName: string }) {
   const [headers, setHeaders] = useState<Record<string, string> | null>(null);
@@ -39,9 +39,6 @@ export default function ProjectBuilds({ appFullName }: { appFullName: string }) 
       }
 
       return data[0].data.app.byFullName?.buildsPaginated.edges || [];
-    },
-    onData: (data) => {
-      console.log(data);
     },
     onError: (error) => {
       console.log(error);

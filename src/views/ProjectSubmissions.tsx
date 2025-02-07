@@ -36,9 +36,6 @@ export default function ProjectSubmissions({ appFullName }: { appFullName: strin
 
       return data[0].data.app.byFullName?.submissionsPaginated.edges || [];
     },
-    onData: (data) => {
-      console.log(data);
-    },
     onError: (error) => {
       console.log(error);
       showToast({
@@ -93,6 +90,7 @@ export default function ProjectSubmissions({ appFullName }: { appFullName: strin
           {data.map((submission) => (
             <List.Item
               id={submission.node.id}
+              key={submission.node.id}
               icon={{
                 source: submission.node.submissionStatus === "FINISHED" ? Icon.CheckCircle : Icon.XmarkCircle,
                 tintColor: getTintColor(submission.node),

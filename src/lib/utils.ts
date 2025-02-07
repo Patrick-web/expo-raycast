@@ -1,5 +1,6 @@
 import { LocalStorage } from "@raycast/api";
 import { baseHeaders } from "./constants";
+import axios from "axios";
 
 export async function getAuthHeaders() {
   const sessionSecret = await LocalStorage.getItem<string>("sessionSecret");
@@ -48,4 +49,37 @@ export function humanDateTime(date: Date): string {
   };
 
   return date.toLocaleDateString("en-US", options);
+}
+
+export async function fetchUrls(urls: string[]): Promise<string> {
+  try {
+    const responses = await Promise.all(
+      urls.map(async (url) => {
+        const response = await axios.get(url, {
+          method: "get",
+          maxBodyLength: Infinity,
+          responseType: "text",
+        });
+        return response.data;
+      }),
+    );
+    return responses.join("");
+  } catch (error) {
+    console.error("Error fetching URLs:", error);
+    throw error;
+  }
+}
+
+export function groupBy<T>(array: T[], key: keyof T): Record<string, T[]> {
+  return array.reduce(
+    (result, item) => {
+      const groupKey = String(item[key]);
+      if (!result[groupKey]) {
+        result[groupKey] = [];
+      }
+      result[groupKey].push(item);
+      return result;
+    },
+    {} as Record<string, T[]>,
+  );
 }

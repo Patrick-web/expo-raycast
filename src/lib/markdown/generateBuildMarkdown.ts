@@ -19,7 +19,6 @@ function getTitle(build: Build) {
 }
 
 export default function generateBuildMarkdown(build: Build): string {
-  console.log({ build });
   if (!build) return ``;
 
   return `

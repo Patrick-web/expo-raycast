@@ -41,7 +41,6 @@ export default function Command() {
 
     try {
       const resp = await axios.request<AccountResponse>(config);
-      console.log(JSON.stringify(resp.data));
 
       if ("errors" in resp.data) {
         const errorMessages = (resp.data as ErrorResponse).errors.map((error) => error.message).join(", ");
