@@ -1,118 +1,12 @@
-import { ActionPanel, Detail, List, Action, Image, showToast, Toast, Icon, ImageMask, Color } from "@raycast/api";
+import { showToast, Toast, Color, List, Icon, ActionPanel, Action, Detail, ImageMask } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { useEffect, useState } from "react";
-import { BASE_URL, ExpoIcon, GithubIcon } from "./lib/constants";
-import { changeCase, getAuthHeaders } from "./lib/utils";
-import { ErrorResponse, ProjectActivity, ProjectsResponse, ProjectTimelineResponse } from "./lib/types";
+import { useState, useEffect } from "react";
+import { BASE_URL, ExpoIcon } from "../lib/constants";
+import { ProjectTimelineResponse, ErrorResponse, ProjectActivity } from "../lib/types";
+import { getAuthHeaders, changeCase } from "../lib/utils";
+import BuildDetails from "./BuiildDetails";
 
-const ProjectsPayload = JSON.stringify([
-  {
-    operationName: "AppsPaginatedQuery",
-    variables: {
-      first: 10,
-      accountName: "pntx",
-      filter: {
-        sortByField: "LATEST_ACTIVITY_TIME",
-      },
-    },
-    query:
-      "query AppsPaginatedQuery($accountName: String!, $after: String, $first: Int, $before: String, $last: Int, $filter: AccountAppsFilterInput) {\n  account {\n    byName(accountName: $accountName) {\n      id\n      appsPaginated(\n        after: $after\n        first: $first\n        before: $before\n        last: $last\n        filter: $filter\n      ) {\n        edges {\n          node {\n            ...AppDataWithRepo\n            __typename\n          }\n          __typename\n        }\n        pageInfo {\n          hasNextPage\n          hasPreviousPage\n          startCursor\n          endCursor\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment AppDataWithRepo on App {\n  ...AppData\n  githubRepository {\n    metadata {\n      githubRepoName\n      githubRepoOwnerName\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nfragment AppData on App {\n  __typename\n  id\n  icon {\n    url\n    primaryColor\n    __typename\n  }\n  iconUrl\n  fullName\n  name\n  slug\n  ownerAccount {\n    name\n    id\n    __typename\n  }\n  githubRepository {\n    githubRepositoryUrl\n    __typename\n  }\n  lastDeletionAttemptTime\n}",
-  },
-]);
-
-export default function Command() {
-  const [headers, setHeaders] = useState<Record<string, string> | null>(null);
-
-  const { isLoading, data } = useFetch(BASE_URL, {
-    body: ProjectsPayload,
-    method: "post",
-    headers: headers || {},
-    execute: headers === null ? false : true,
-    parseResponse: async (resp) => {
-      const data = (await resp.json()) as ProjectsResponse;
-      if ("errors" in data) {
-        const errorMessages = (data as ErrorResponse).errors.map((error) => error.message).join(", ");
-        showToast({ title: "Error Fetching Projects", message: errorMessages, style: Toast.Style.Failure });
-        return [];
-      }
-
-      return data[0].data.account.byName.appsPaginated.edges;
-    },
-    onData: (data) => {
-      console.log(data);
-    },
-    onError: (error) => {
-      console.log(error);
-      showToast({
-        title: "Error fetching projects",
-        message: (error as Error)?.message || "",
-        style: Toast.Style.Failure,
-      });
-    },
-    initialData: [],
-  });
-
-  useEffect(() => {
-    async function fetchHeaders() {
-      const authHeaders = await getAuthHeaders();
-      setHeaders(authHeaders);
-    }
-    fetchHeaders();
-  }, []);
-
-  return (
-    <List isLoading={isLoading}>
-      {data ? (
-        <>
-          {data.map((project) => (
-            <List.Item
-              icon={
-                project.node.iconUrl
-                  ? {
-                      source: project.node.iconUrl,
-                      mask: Image.Mask.Circle,
-                    }
-                  : Icon.MemoryChip
-              }
-              title={project.node.name}
-              actions={
-                <ActionPanel>
-                  <Action.Push
-                    title="View Activity"
-                    target={<ProjectTimeline appFullName={project.node.fullName} />}
-                    icon={Icon.Box}
-                  />
-                  <Action.OpenInBrowser
-                    title="Open on Expo"
-                    url={`https://expo.dev/accounts/${project.node.fullName}`}
-                    icon={{
-                      source: ExpoIcon,
-                      mask: ImageMask.Circle,
-                    }}
-                  />
-                  {project.node.githubRepository && (
-                    <Action.OpenInBrowser
-                      title="Open on GitHub"
-                      url={project.node.githubRepository}
-                      icon={{
-                        source: GithubIcon,
-                        mask: ImageMask.Circle,
-                      }}
-                    />
-                  )}
-                </ActionPanel>
-              }
-            />
-          ))}
-        </>
-      ) : (
-        <List.EmptyView />
-      )}
-    </List>
-  );
-}
-
-function ProjectTimeline({ appFullName }: { appFullName: string }) {
+export default function ProjectTimeline({ appFullName }: { appFullName: string }) {
   const [headers, setHeaders] = useState<Record<string, string> | null>(null);
 
   const ProjectTimelinePayload = JSON.stringify([
@@ -212,7 +106,7 @@ function ProjectTimeline({ appFullName }: { appFullName: string }) {
   }
 
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} navigationTitle="Project Activity">
       {data ? (
         <>
           {data.map((project) => (
@@ -240,7 +134,20 @@ function ProjectTimeline({ appFullName }: { appFullName: string }) {
               ]}
               actions={
                 <ActionPanel>
-                  <Action.Push title="View Build" target={<Detail markdown="# Hey! 👋" />} icon={Icon.Box} />
+                  {project.node.__typename === "Build" && (
+                    <Action.Push
+                      title="View Build"
+                      target={<BuildDetails buildId={project.node.id} />}
+                      icon={Icon.Box}
+                    />
+                  )}
+                  {project.node.__typename === "Submission" && (
+                    <Action.Push
+                      title="View Submission"
+                      target={<BuildDetails buildId={project.node.id} />}
+                      icon={Icon.Box}
+                    />
+                  )}
                   <Action.OpenInBrowser
                     title="View on Expo"
                     url={getExpoLink(project.node)}
@@ -255,7 +162,7 @@ function ProjectTimeline({ appFullName }: { appFullName: string }) {
           ))}
         </>
       ) : (
-        <List.EmptyView />
+        <List.EmptyView title="No Activity Found" />
       )}
     </List>
   );

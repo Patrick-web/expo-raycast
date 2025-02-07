@@ -18,15 +18,9 @@
       "mode": "view"
     },
     {
-      "name": "view-projects",
-      "title": "View Projects",
-      "description": "List  of projects in expo",
-      "mode": "view"
-    },
-    {
-      "name": "project-history",
-      "title": "Project History",
-      "description": "View project activity",
+      "name": "manage-projects",
+      "title": "Manage Projects",
+      "description": "Manage expo of projects",
       "mode": "view"
     }
   ],
