@@ -7,6 +7,7 @@ export async function getAuthHeaders() {
   return {
     ...baseHeaders,
     "expo-session": sessionSecret || "",
+    cookie: `io.expo.auth.sessionSecret=${encodeURIComponent(sessionSecret || "")};`,
   };
 }
 
@@ -82,4 +83,13 @@ export function groupBy<T>(array: T[], key: keyof T): Record<string, T[]> {
     },
     {} as Record<string, T[]>,
   );
+}
+
+export function stripHTMLTags(str: string) {
+  if (str === null || str === "") {
+    return false;
+  } else {
+    str = str.toString();
+    return str.replace(/<[^>]*>/g, "");
+  }
 }

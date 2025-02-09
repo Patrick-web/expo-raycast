@@ -19,8 +19,20 @@
     },
     {
       "name": "manage-projects",
-      "title": "Manage Projects",
+      "title": "Projects",
       "description": "Manage expo of projects",
+      "mode": "view"
+    },
+    {
+      "name": "apple-devices",
+      "title": "Apple Devices",
+      "description": "Manage expo of apple devices",
+      "mode": "view"
+    },
+    {
+      "name": "manage-envs",
+      "title": "Environment Variables",
+      "description": "Manage Project Enviroment Variables",
       "mode": "view"
     }
   ],
@@ -28,7 +40,9 @@
     "@raycast/api": "^1.90.0",
     "@raycast/utils": "^1.17.0",
     "@tanstack/react-query": "^5.66.0",
-    "axios": "^1.7.9"
+    "@types/qrcode": "^1.5.5",
+    "axios": "^1.7.9",
+    "qrcode": "^1.5.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",

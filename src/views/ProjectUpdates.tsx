@@ -5,6 +5,7 @@ import { BASE_URL, ExpoIcon } from "../lib/constants";
 import { ErrorResponse } from "../lib/types";
 import { getAuthHeaders, humanDateTime } from "../lib/utils";
 import { ProjectUpdate, ProjectUpdatesResponse } from "../lib/types/project-updates.types";
+import UpdateGroup from "./UpdateDetails";
 
 export default function ProjectBuilds({ appFullName }: { appFullName: string }) {
   const [headers, setHeaders] = useState<Record<string, string> | null>(null);
@@ -68,7 +69,7 @@ export default function ProjectBuilds({ appFullName }: { appFullName: string }) 
             <List.Item
               id={update.node.id}
               icon={{
-                source: Icon.Cloud,
+                source: Icon.Layers,
               }}
               title={{ value: update.node.message ?? "" }}
               subtitle={humanDateTime(new Date(update.node.activityTimestamp))}
@@ -93,7 +94,17 @@ export default function ProjectBuilds({ appFullName }: { appFullName: string }) 
               ]}
               actions={
                 <ActionPanel>
-                  <Action.Push title="View Update" target={<Detail markdown="# Hey! 👋" />} icon={Icon.Box} />
+                  <Action.Push
+                    title="View Update"
+                    target={
+                      <UpdateGroup
+                        appName={update.node.app.name}
+                        username={update.node.actor.username}
+                        group={update.node.group}
+                      />
+                    }
+                    icon={Icon.Box}
+                  />
                   <Action.OpenInBrowser
                     title="View on Expo"
                     url={getExpoLink(update.node)}

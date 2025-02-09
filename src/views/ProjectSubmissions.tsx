@@ -5,6 +5,7 @@ import { BASE_URL, ExpoIcon } from "../lib/constants";
 import { ErrorResponse } from "../lib/types";
 import { getAuthHeaders, changeCase, humanDateTime } from "../lib/utils";
 import { ProjectSubmission, ProjectSubmissionResponse } from "../lib/types/project-submissions.types";
+import Submission from "./SubmissionDetails";
 
 export default function ProjectSubmissions({ appFullName }: { appFullName: string }) {
   const [headers, setHeaders] = useState<Record<string, string> | null>(null);
@@ -92,7 +93,7 @@ export default function ProjectSubmissions({ appFullName }: { appFullName: strin
               id={submission.node.id}
               key={submission.node.id}
               icon={{
-                source: submission.node.submissionStatus === "FINISHED" ? Icon.CheckCircle : Icon.XmarkCircle,
+                source: Icon.Leaf,
                 tintColor: getTintColor(submission.node),
               }}
               title={getTitle(submission.node)}
@@ -107,7 +108,11 @@ export default function ProjectSubmissions({ appFullName }: { appFullName: strin
               ]}
               actions={
                 <ActionPanel>
-                  <Action.Push title="View Submission" target={<Detail markdown="# Hey! 👋" />} icon={Icon.Box} />
+                  <Action.Push
+                    title="View Submission"
+                    target={<Submission submissionId={submission.node.id} />}
+                    icon={Icon.Box}
+                  />
                   <Action.OpenInBrowser
                     title="View on Expo"
                     url={getExpoLink(submission.node)}

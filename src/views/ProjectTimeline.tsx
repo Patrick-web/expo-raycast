@@ -3,8 +3,10 @@ import { useFetch } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { BASE_URL, ExpoIcon } from "../lib/constants";
 import { ProjectTimelineResponse, ErrorResponse, ProjectActivity } from "../lib/types";
-import { getAuthHeaders, changeCase } from "../lib/utils";
+import { getAuthHeaders, changeCase, humanDateTime } from "../lib/utils";
 import BuildDetails from "./BuildDetails";
+import Submission from "./SubmissionDetails";
+import UpdateGroup from "./UpdateDetails";
 
 export default function ProjectTimeline({ appFullName }: { appFullName: string }) {
   const [headers, setHeaders] = useState<Record<string, string> | null>(null);
@@ -81,10 +83,7 @@ export default function ProjectTimeline({ appFullName }: { appFullName: string }
   }
 
   function getStatusTag(activity: ProjectActivity) {
-    return changeCase(
-      activity.buildStatus || activity.submissionStatus || activity.branch?.name + "🎋" || "",
-      "sentence",
-    );
+    return changeCase(activity.buildStatus || activity.submissionStatus || activity.branch?.name || "", "sentence");
   }
 
   function getTitle(activity: ProjectActivity) {
@@ -113,16 +112,15 @@ export default function ProjectTimeline({ appFullName }: { appFullName: string }
               icon={{
                 source:
                   project.node.__typename === "Build"
-                    ? Icon.HardDrive
+                    ? Icon.Hammer
                     : project.node.__typename === "Update"
-                      ? Icon.Cloud
-                      : Icon.Store,
+                      ? Icon.Layers
+                      : Icon.Leaf,
                 tintColor: setTintColor(project.node),
               }}
               title={getTitle(project.node)}
+              subtitle={humanDateTime(new Date(project.node.activityTimestamp))}
               accessories={[
-                { date: new Date(project.node.activityTimestamp) },
-                { text: new Date(project.node.activityTimestamp).toLocaleTimeString() },
                 {
                   tag: {
                     value: getStatusTag(project.node),
@@ -136,13 +134,26 @@ export default function ProjectTimeline({ appFullName }: { appFullName: string }
                     <Action.Push
                       title="View Build"
                       target={<BuildDetails buildId={project.node.id} />}
-                      icon={Icon.Box}
+                      icon={Icon.Hammer}
                     />
                   )}
                   {project.node.__typename === "Submission" && (
                     <Action.Push
                       title="View Submission"
-                      target={<BuildDetails buildId={project.node.id} />}
+                      target={<Submission submissionId={project.node.id} />}
+                      icon={Icon.Layers}
+                    />
+                  )}
+                  {project.node.__typename === "Update" && (
+                    <Action.Push
+                      title="View Update"
+                      target={
+                        <UpdateGroup
+                          appName={project.node.app.name}
+                          username={project.node.actor.username}
+                          group={project.node.group}
+                        />
+                      }
                       icon={Icon.Box}
                     />
                   )}

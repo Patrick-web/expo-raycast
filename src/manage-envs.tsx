@@ -1,13 +1,11 @@
-import { ActionPanel, List, Action, Image, showToast, Toast, Icon, ImageMask } from "@raycast/api";
+import { ActionPanel, List, Action, Image, showToast, Toast, Icon } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { BASE_URL, ExpoIcon, GithubIcon } from "./lib/constants";
+import { BASE_URL } from "./lib/constants";
 import { getAuthHeaders } from "./lib/utils";
 import { ErrorResponse, ProjectsResponse } from "./lib/types";
-import ProjectBuilds from "./views/ProjectBuilds";
 import ProjectTimeline from "./views/ProjectTimeline";
-import ProjectSubmissions from "./views/ProjectSubmissions";
-import ProjectUpdates from "./views/ProjectUpdates";
+import ProjectEnvs from "./views/ProjectEnvs";
 
 const ProjectsPayload = JSON.stringify([
   {
@@ -62,7 +60,7 @@ export default function Command() {
   }, []);
 
   return (
-    <List isLoading={isLoading} navigationTitle="Expo Projects" searchBarPlaceholder="Search Projects">
+    <List isLoading={isLoading} navigationTitle="Enviroment Variables" searchBarPlaceholder="Pick a Project">
       {data ? (
         <>
           {data.map((project) => (
@@ -80,43 +78,10 @@ export default function Command() {
               actions={
                 <ActionPanel>
                   <Action.Push
-                    title="View Activity"
-                    target={<ProjectTimeline appFullName={project.node.fullName} />}
+                    title="View Enviroment Variables"
+                    target={<ProjectEnvs appFullName={project.node.fullName} />}
                     icon={Icon.LineChart}
                   />
-                  <Action.Push
-                    title="View Builds"
-                    target={<ProjectBuilds appFullName={project.node.fullName} />}
-                    icon={Icon.HardDrive}
-                  />
-                  <Action.Push
-                    title="View Submissions"
-                    target={<ProjectSubmissions appFullName={project.node.fullName} />}
-                    icon={Icon.Leaf}
-                  />
-                  <Action.Push
-                    title="View Updates"
-                    target={<ProjectUpdates appFullName={project.node.fullName} />}
-                    icon={Icon.Layers}
-                  />
-                  <Action.OpenInBrowser
-                    title="Open on Expo"
-                    url={`https://expo.dev/accounts/${project.node.fullName}`}
-                    icon={{
-                      source: ExpoIcon,
-                      mask: ImageMask.Circle,
-                    }}
-                  />
-                  {project.node.githubRepository && (
-                    <Action.OpenInBrowser
-                      title="Open on GitHub"
-                      url={project.node.githubRepository}
-                      icon={{
-                        source: GithubIcon,
-                        mask: ImageMask.Circle,
-                      }}
-                    />
-                  )}
                 </ActionPanel>
               }
             />

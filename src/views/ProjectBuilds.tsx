@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { BASE_URL, ExpoIcon } from "../lib/constants";
 import { ErrorResponse } from "../lib/types";
 import { ProjectBuildsResponse, ProjectBuild } from "../lib/types/project-builds.types";
-import { getAuthHeaders, changeCase } from "../lib/utils";
+import { getAuthHeaders, changeCase, humanDateTime } from "../lib/utils";
 import BuildDetails from "./BuildDetails";
 
 export default function ProjectBuilds({ appFullName }: { appFullName: string }) {
@@ -94,13 +94,12 @@ export default function ProjectBuilds({ appFullName }: { appFullName: string }) 
               id={build.node.id}
               key={build.node.id}
               icon={{
-                source: Icon.HardDrive,
+                source: Icon.Hammer,
                 tintColor: setTintColor(build.node),
               }}
               title={getTitle(build.node)}
+              subtitle={humanDateTime(new Date(build.node.activityTimestamp))}
               accessories={[
-                { date: new Date(build.node.activityTimestamp) },
-                { text: new Date(build.node.activityTimestamp).toLocaleTimeString() },
                 {
                   tag: {
                     value: getStatusTag(build.node),

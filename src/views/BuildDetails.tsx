@@ -1,4 +1,4 @@
-import { showToast, Toast, ActionPanel, Detail, List, Action, Icon } from "@raycast/api";
+import { showToast, Toast, ActionPanel, Detail, List, Action, Icon, Color } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { BASE_URL } from "../lib/constants";
@@ -64,10 +64,6 @@ export default function BuildDetails({ buildId }: { buildId: string }) {
     return link.toLowerCase();
   }
 
-  if (!data) {
-    <List.EmptyView title="No Builds Found" />;
-  }
-
   return (
     <Detail
       isLoading={isLoading}
@@ -78,8 +74,35 @@ export default function BuildDetails({ buildId }: { buildId: string }) {
           {data && (
             <Action.Push title="View Logs" icon={Icon.AppWindowList} target={<LogsViewer logFiles={data.logFiles} />} />
           )}
+          {data && data?.artifacts?.applicationArchiveUrl && (
+            <Action.OpenInBrowser
+              title="Download Build"
+              url={data.artifacts.applicationArchiveUrl}
+              icon={Icon.Download}
+            />
+          )}
           {data && <Action.OpenInBrowser title="View on Expo" url={getExpoLink(data)} icon={"expo.png"} />}
         </ActionPanel>
+      }
+      metadata={
+        <Detail.Metadata>
+          {data && (
+            <>
+              <Detail.Metadata.TagList title="Status">
+                <Detail.Metadata.TagList.Item
+                  text={data.status}
+                  color={data?.status === "ERRORED" ? Color.Red : Color.Green}
+                />
+              </Detail.Metadata.TagList>
+              <Detail.Metadata.Label title="Profile" text={data.buildProfile} />
+              <Detail.Metadata.Label title="Deployement" text={data.appBuildVersion} />
+              <Detail.Metadata.Label title="Version" text={data.runtime?.version} />
+              <Detail.Metadata.Label title="Build Number" text={data.appBuildVersion} />
+              <Detail.Metadata.Label title="Commit" text={data.gitCommitHash} />
+              <Detail.Metadata.Label title="Created By" text={data.initiatingActor?.fullName} />
+            </>
+          )}
+        </Detail.Metadata>
       }
     />
   );

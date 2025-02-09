@@ -1,20 +1,12 @@
 import { Build } from "../types/build-details.types";
 import { changeCase, humanDateTime } from "../utils";
 
-function formatTime(seconds: number): string {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const remainingSeconds = seconds % 60;
-
-  return `${hours}H ${minutes}M ${remainingSeconds}S`;
-}
-
 function getTitle(build: Build) {
   const platform = changeCase(build.platform || "", "upper");
   if (platform === "IOS") {
-    return `${platform} ${build.distribution} Build`;
+    return `${platform} App ${changeCase(build.distribution, "sentence")} Build`;
   } else {
-    return `${platform} ${build.distribution} Build`;
+    return `${platform} Play ${changeCase(build.distribution, "sentence")} Build`;
   }
 }
 
@@ -23,6 +15,7 @@ export default function generateBuildMarkdown(build: Build): string {
 
   return `
 ## ${getTitle(build)}
+
 
 | **PROPERTY**      | **VALUE**       |
 |-------------------|-----------------|
