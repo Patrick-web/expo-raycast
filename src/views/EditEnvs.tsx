@@ -70,7 +70,7 @@ export default function EditEnv({ env, refreshEnvs }: { env: EnvironmentVariable
         }
       } catch (error) {
         console.log("&&&&&&&&&&&&&&");
-        console.error(error.message);
+        console.error((error as Error).message);
         showToast({
           title: "Failed to update device name",
           message: (error as Error).message || "",

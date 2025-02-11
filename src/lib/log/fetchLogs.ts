@@ -35,7 +35,7 @@ export async function fetchLogs(urls: string[]): Promise<LogGroups> {
         const grouped = groupBy(logs, "phase");
         const asArray = Object.keys(grouped).map((key) => [key, grouped[key]]);
 
-        resolve(asArray);
+        resolve(asArray as LogGroups);
       })
       .catch((error) => reject(error));
   });

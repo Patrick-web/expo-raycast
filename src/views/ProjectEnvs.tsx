@@ -110,26 +110,25 @@ export default function ProjectEnvs({ appFullName }: { appFullName: string }) {
         },
       ]);
 
-      const { data, error } = await axios.post(BASE_URL, deleteEnvPayload, {
-        headers: headers || {},
-      });
-
-      if (error) {
-        await showToast({ title: error.message });
-        return;
-      }
-
-      if ("errors" in data) {
-        const errorMessages = (data as ErrorResponse).errors.map((error) => error.message).join(", ");
-        showToast({
-          title: "Error Fetching Project Enviroment Variables",
-          message: errorMessages,
-          style: Toast.Style.Failure,
+      try {
+        const { data } = await axios.post(BASE_URL, deleteEnvPayload, {
+          headers: headers || {},
         });
-        return;
+
+        if ("errors" in data) {
+          const errorMessages = (data as ErrorResponse).errors.map((error) => error.message).join(", ");
+          showToast({
+            title: "Error Fetching Project Enviroment Variables",
+            message: errorMessages,
+            style: Toast.Style.Failure,
+          });
+          return;
+        }
+        await showToast({ title: "Environment Variable Deleted" });
+        revalidate();
+      } catch (error) {
+        await showToast({ title: "Error", message: (error as Error).message, style: Toast.Style.Failure });
       }
-      await showToast({ title: "Environment Variable Deleted" });
-      revalidate();
     } else {
       await showToast({ title: "Operation Canceled" });
     }
