@@ -3,12 +3,13 @@ import { useFetch } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { BASE_URL } from "./lib/constants";
 import { getAuthHeaders } from "./lib/utils";
-import { ErrorResponse, ProjectsResponse } from "./lib/types";
+import { ErrorResponse } from "./lib/types";
 import ProjectBuilds from "./views/ProjectBuilds";
 import ProjectTimeline from "./views/ProjectTimeline";
 import ProjectSubmissions from "./views/ProjectSubmissions";
 import ProjectUpdates from "./views/ProjectUpdates";
 import AccountPicker from "./components/AccountPicker";
+import { ProjectsResponse } from "./lib/types/projects.types";
 
 export default function Command() {
   const [headers, setHeaders] = useState<Record<string, string> | null>(null);

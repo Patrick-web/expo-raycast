@@ -1,12 +1,13 @@
-import { showToast, Toast, Color, List, Icon, ActionPanel, Action, ImageMask } from "@raycast/api";
+import { showToast, Toast, Color, List, Icon, ActionPanel, Action } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { BASE_URL } from "../lib/constants";
-import { ProjectTimelineResponse, ErrorResponse, ProjectActivity } from "../lib/types";
+import { ErrorResponse } from "../lib/types";
 import { getAuthHeaders, changeCase, humanDateTime } from "../lib/utils";
 import BuildDetails from "./BuildDetails";
 import Submission from "./SubmissionDetails";
 import UpdateGroup from "./UpdateDetails";
+import { ProjectTimelineResponse, ProjectActivity } from "../lib/types/projects.types";
 
 export default function ProjectTimeline({ appFullName }: { appFullName: string }) {
   const [headers, setHeaders] = useState<Record<string, string> | null>(null);

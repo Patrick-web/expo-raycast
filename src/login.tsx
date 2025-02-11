@@ -1,10 +1,11 @@
-import { Form, ActionPanel, Action, showToast, Toast, LocalStorage } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, LocalStorage, useNavigation } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import axios from "axios";
 import { BASE_URL, baseHeaders } from "./lib/constants";
 import { ErrorResponse } from "./lib/types";
 import { getAuthHeaders } from "./lib/utils";
 import { UsersResponse } from "./lib/types/users-types.types";
+import Projects from "./manage-projects";
 
 interface Payload {
   email: string;
@@ -20,6 +21,8 @@ interface SuccessLogin {
 type LoginResponse = SuccessLogin | ErrorResponse;
 
 export default function Command() {
+  const { push } = useNavigation();
+
   async function getAccount() {
     const toast = await showToast({ title: "Setting up...", style: Toast.Style.Animated });
 
@@ -54,6 +57,7 @@ export default function Command() {
         toast.style = Toast.Style.Success;
         toast.title = "All setup";
         toast.message = "You can use the other commands";
+        push(<Projects />);
       }
     } catch (error) {
       console.log(error);
