@@ -1,6 +1,5 @@
 import { List, Icon, ActionPanel, Action } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { Build } from "../lib/types/build-details.types";
 import { fetchLogs } from "../lib/log/fetchLogs";
 import { changeCase } from "../lib/utils";
 import { generateLogsMarkdown } from "../lib/markdown/generateLogsMarkdown";

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Grid, Icon, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Grid, Icon, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getAuthHeaders } from "../lib/utils";
 import QRCode from "qrcode";

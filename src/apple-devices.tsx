@@ -7,33 +7,34 @@ import { ErrorResponse } from "./lib/types";
 import { AppleDevicesResponse } from "./lib/types/apple-devices.types";
 import EditAppleDevice from "./views/EditAppleDevice";
 import AddAppleDevice from "./views/AddAppleDevice";
-
-const AppleDevicesPayload = JSON.stringify([
-  {
-    operationName: "AppleDevicesPaginatedQuery",
-    variables: {
-      accountName: "pntx",
-      first: 15,
-      filter: {},
-    },
-    query:
-      "query AppleDevicesPaginatedQuery($accountName: String!, $after: String, $first: Int, $before: String, $last: Int, $filter: AppleDeviceFilterInput) {\n  account {\n    byName(accountName: $accountName) {\n      id\n      appleDevicesPaginated(\n        after: $after\n        first: $first\n        before: $before\n        last: $last\n        filter: $filter\n      ) {\n        edges {\n          node {\n            ...AppleDeviceData\n            __typename\n          }\n          __typename\n        }\n        pageInfo {\n          hasNextPage\n          hasPreviousPage\n          startCursor\n          endCursor\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment AppleDeviceData on AppleDevice {\n  __typename\n  id\n  appleTeam {\n    ...AppleTeamData\n    __typename\n  }\n  identifier\n  name\n  model\n  deviceClass\n  softwareVersion\n  enabled\n  createdAt\n}\n\nfragment AppleTeamData on AppleTeam {\n  id\n  appleTeamIdentifier\n  appleTeamName\n  __typename\n}",
-  },
-  {
-    operationName: "AppleTeamsPaginatedByAccountQuery",
-    variables: {
-      first: 100,
-      accountName: "pntx",
-    },
-    query:
-      "query AppleTeamsPaginatedByAccountQuery($accountName: String!, $after: String, $first: Int, $before: String, $last: Int) {\n  account {\n    byName(accountName: $accountName) {\n      id\n      appleTeamsPaginated(after: $after, first: $first, before: $before, last: $last) {\n        edges {\n          node {\n            ...AppleTeamData\n            __typename\n          }\n          __typename\n        }\n        pageInfo {\n          hasNextPage\n          hasPreviousPage\n          startCursor\n          endCursor\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment AppleTeamData on AppleTeam {\n  id\n  appleTeamIdentifier\n  appleTeamName\n  __typename\n}",
-  },
-]);
+import AccountPicker from "./components/AccountPicker";
 
 export default function Command() {
   const [headers, setHeaders] = useState<Record<string, string> | null>(null);
 
-  const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
+  const [accountName, setAccountName] = useState("");
+
+  const AppleDevicesPayload = JSON.stringify([
+    {
+      operationName: "AppleDevicesPaginatedQuery",
+      variables: {
+        accountName: accountName,
+        first: 15,
+        filter: {},
+      },
+      query:
+        "query AppleDevicesPaginatedQuery($accountName: String!, $after: String, $first: Int, $before: String, $last: Int, $filter: AppleDeviceFilterInput) {\n  account {\n    byName(accountName: $accountName) {\n      id\n      appleDevicesPaginated(\n        after: $after\n        first: $first\n        before: $before\n        last: $last\n        filter: $filter\n      ) {\n        edges {\n          node {\n            ...AppleDeviceData\n            __typename\n          }\n          __typename\n        }\n        pageInfo {\n          hasNextPage\n          hasPreviousPage\n          startCursor\n          endCursor\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment AppleDeviceData on AppleDevice {\n  __typename\n  id\n  appleTeam {\n    ...AppleTeamData\n    __typename\n  }\n  identifier\n  name\n  model\n  deviceClass\n  softwareVersion\n  enabled\n  createdAt\n}\n\nfragment AppleTeamData on AppleTeam {\n  id\n  appleTeamIdentifier\n  appleTeamName\n  __typename\n}",
+    },
+    {
+      operationName: "AppleTeamsPaginatedByAccountQuery",
+      variables: {
+        first: 100,
+        accountName: accountName,
+      },
+      query:
+        "query AppleTeamsPaginatedByAccountQuery($accountName: String!, $after: String, $first: Int, $before: String, $last: Int) {\n  account {\n    byName(accountName: $accountName) {\n      id\n      appleTeamsPaginated(after: $after, first: $first, before: $before, last: $last) {\n        edges {\n          node {\n            ...AppleTeamData\n            __typename\n          }\n          __typename\n        }\n        pageInfo {\n          hasNextPage\n          hasPreviousPage\n          startCursor\n          endCursor\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment AppleTeamData on AppleTeam {\n  id\n  appleTeamIdentifier\n  appleTeamName\n  __typename\n}",
+    },
+  ]);
 
   const { isLoading, data, revalidate } = useFetch(BASE_URL, {
     body: AppleDevicesPayload,
@@ -90,28 +91,7 @@ export default function Command() {
       isLoading={isLoading}
       navigationTitle="Apple Devices"
       isShowingDetail
-      searchBarAccessory={
-        <List.Dropdown
-          tooltip="Apple Team"
-          storeValue
-          onChange={(value) => {
-            setSelectedTeam(value);
-            // TODO: Make the fetch request fot that team
-          }}
-        >
-          <List.Dropdown.Section>
-            {data &&
-              data.teams &&
-              data.teams.map((team) => (
-                <List.Dropdown.Item
-                  key={team.id}
-                  title={team.appleTeamName || ""}
-                  value={team.appleTeamIdentifier || ""}
-                />
-              ))}
-          </List.Dropdown.Section>
-        </List.Dropdown>
-      }
+      searchBarAccessory={<AccountPicker onPick={(acc) => setAccountName(acc.name)} />}
     >
       {data && data.devices ? (
         <>

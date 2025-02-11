@@ -1,7 +1,7 @@
-import { showToast, Toast, Color, List, Icon, ActionPanel, Action, Detail, ImageMask } from "@raycast/api";
+import { showToast, Toast, Color, List, Icon, ActionPanel, Action, ImageMask } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState, useEffect } from "react";
-import { BASE_URL, ExpoIcon } from "../lib/constants";
+import { BASE_URL } from "../lib/constants";
 import { ErrorResponse } from "../lib/types";
 import { getAuthHeaders, changeCase, humanDateTime } from "../lib/utils";
 import { ProjectSubmission, ProjectSubmissionResponse } from "../lib/types/project-submissions.types";
@@ -117,7 +117,7 @@ export default function ProjectSubmissions({ appFullName }: { appFullName: strin
                     title="View on Expo"
                     url={getExpoLink(submission.node)}
                     icon={{
-                      source: ExpoIcon,
+                      source: "expo.png",
                       mask: ImageMask.Circle,
                     }}
                   />

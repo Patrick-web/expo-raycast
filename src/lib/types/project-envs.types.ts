@@ -36,3 +36,32 @@ export interface EnvironmentVariablesItem {
   __typename: string;
   linkedEnvironments: null | any[];
 }
+
+export type ProjectEnvsSenstiveResponse = ProjectEnvsSensitveSuccess | ErrorResponse;
+
+type ProjectEnvsSensitveSuccess = ProjectEnvsSensitveSuccessItem[];
+
+interface ProjectEnvsSensitveSuccessItem {
+  data: Data;
+}
+interface Data {
+  app: App;
+}
+interface App {
+  byFullName: ByFullName;
+  __typename: string;
+}
+interface ByFullName {
+  id: string;
+  environmentVariablesIncludingSensitive: EnvironmentVariablesIncludingSensitiveItem[];
+  __typename: string;
+}
+interface EnvironmentVariablesIncludingSensitiveItem {
+  id: string;
+  name: string;
+  scope: string;
+  value: null | string;
+  environments: string[];
+  createdAt: string;
+  __typename: string;
+}

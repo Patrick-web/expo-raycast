@@ -1,7 +1,7 @@
-import { showToast, Toast, List, Icon, ActionPanel, Action, Detail, ImageMask, Color } from "@raycast/api";
+import { showToast, Toast, List, Icon, ActionPanel, Action, ImageMask, Color } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState, useEffect } from "react";
-import { BASE_URL, ExpoIcon } from "../lib/constants";
+import { BASE_URL } from "../lib/constants";
 import { ErrorResponse } from "../lib/types";
 import { getAuthHeaders, humanDateTime } from "../lib/utils";
 import { ProjectUpdate, ProjectUpdatesResponse } from "../lib/types/project-updates.types";
@@ -98,7 +98,7 @@ export default function ProjectBuilds({ appFullName }: { appFullName: string }) 
                     title="View Update"
                     target={
                       <UpdateGroup
-                        appName={update.node.app.name}
+                        appName={update.node.app.name ?? ""}
                         username={update.node.actor.username}
                         group={update.node.group}
                       />
@@ -109,7 +109,7 @@ export default function ProjectBuilds({ appFullName }: { appFullName: string }) 
                     title="View on Expo"
                     url={getExpoLink(update.node)}
                     icon={{
-                      source: ExpoIcon,
+                      source: "expo.png",
                       mask: ImageMask.Circle,
                     }}
                   />

@@ -1,4 +1,4 @@
-import { showToast, Toast, ActionPanel, Detail, List, Action, Icon, Color } from "@raycast/api";
+import { showToast, Toast, ActionPanel, Detail, Action, Icon, Color } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { BASE_URL } from "../lib/constants";

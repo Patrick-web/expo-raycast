@@ -4,26 +4,28 @@ import { useEffect, useState } from "react";
 import { BASE_URL } from "./lib/constants";
 import { getAuthHeaders } from "./lib/utils";
 import { ErrorResponse, ProjectsResponse } from "./lib/types";
-import ProjectTimeline from "./views/ProjectTimeline";
 import ProjectEnvs from "./views/ProjectEnvs";
-
-const ProjectsPayload = JSON.stringify([
-  {
-    operationName: "AppsPaginatedQuery",
-    variables: {
-      first: 10,
-      accountName: "pntx",
-      filter: {
-        sortByField: "LATEST_ACTIVITY_TIME",
-      },
-    },
-    query:
-      "query AppsPaginatedQuery($accountName: String!, $after: String, $first: Int, $before: String, $last: Int, $filter: AccountAppsFilterInput) {\n  account {\n    byName(accountName: $accountName) {\n      id\n      appsPaginated(\n        after: $after\n        first: $first\n        before: $before\n        last: $last\n        filter: $filter\n      ) {\n        edges {\n          node {\n            ...AppDataWithRepo\n            __typename\n          }\n          __typename\n        }\n        pageInfo {\n          hasNextPage\n          hasPreviousPage\n          startCursor\n          endCursor\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment AppDataWithRepo on App {\n  ...AppData\n  githubRepository {\n    metadata {\n      githubRepoName\n      githubRepoOwnerName\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nfragment AppData on App {\n  __typename\n  id\n  icon {\n    url\n    primaryColor\n    __typename\n  }\n  iconUrl\n  fullName\n  name\n  slug\n  ownerAccount {\n    name\n    id\n    __typename\n  }\n  githubRepository {\n    githubRepositoryUrl\n    __typename\n  }\n  lastDeletionAttemptTime\n}",
-  },
-]);
+import AccountPicker from "./components/AccountPicker";
 
 export default function Command() {
   const [headers, setHeaders] = useState<Record<string, string> | null>(null);
+
+  const [accountName, setAccountName] = useState("");
+
+  const ProjectsPayload = JSON.stringify([
+    {
+      operationName: "AppsPaginatedQuery",
+      variables: {
+        first: 10,
+        accountName: accountName,
+        filter: {
+          sortByField: "LATEST_ACTIVITY_TIME",
+        },
+      },
+      query:
+        "query AppsPaginatedQuery($accountName: String!, $after: String, $first: Int, $before: String, $last: Int, $filter: AccountAppsFilterInput) {\n  account {\n    byName(accountName: $accountName) {\n      id\n      appsPaginated(\n        after: $after\n        first: $first\n        before: $before\n        last: $last\n        filter: $filter\n      ) {\n        edges {\n          node {\n            ...AppDataWithRepo\n            __typename\n          }\n          __typename\n        }\n        pageInfo {\n          hasNextPage\n          hasPreviousPage\n          startCursor\n          endCursor\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment AppDataWithRepo on App {\n  ...AppData\n  githubRepository {\n    metadata {\n      githubRepoName\n      githubRepoOwnerName\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nfragment AppData on App {\n  __typename\n  id\n  icon {\n    url\n    primaryColor\n    __typename\n  }\n  iconUrl\n  fullName\n  name\n  slug\n  ownerAccount {\n    name\n    id\n    __typename\n  }\n  githubRepository {\n    githubRepositoryUrl\n    __typename\n  }\n  lastDeletionAttemptTime\n}",
+    },
+  ]);
 
   const { isLoading, data } = useFetch(BASE_URL, {
     body: ProjectsPayload,
@@ -60,7 +62,12 @@ export default function Command() {
   }, []);
 
   return (
-    <List isLoading={isLoading} navigationTitle="Enviroment Variables" searchBarPlaceholder="Pick a Project">
+    <List
+      isLoading={isLoading}
+      navigationTitle="Enviroment Variables"
+      searchBarPlaceholder="Pick a Project"
+      searchBarAccessory={<AccountPicker onPick={(acc) => setAccountName(acc.name)} />}
+    >
       {data ? (
         <>
           {data.map((project) => (

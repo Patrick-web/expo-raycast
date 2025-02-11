@@ -1,6 +1,7 @@
 import { LocalStorage } from "@raycast/api";
 import { baseHeaders } from "./constants";
 import axios from "axios";
+import { AccountsItem } from "./types/users-types.types";
 
 export async function getAuthHeaders() {
   const sessionSecret = await LocalStorage.getItem<string>("sessionSecret");
@@ -9,6 +10,12 @@ export async function getAuthHeaders() {
     "expo-session": sessionSecret || "",
     cookie: `io.expo.auth.sessionSecret=${encodeURIComponent(sessionSecret || "")};`,
   };
+}
+
+export async function getAccounts(): Promise<AccountsItem[]> {
+  const accounts = (await LocalStorage.getItem<string>("accounts")) ?? "{}";
+
+  return JSON.parse(accounts);
 }
 
 export function changeCase(

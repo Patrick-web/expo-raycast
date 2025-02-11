@@ -1,7 +1,7 @@
 import { showToast, Toast, Color, List, Icon, ActionPanel, Action, ImageMask } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState, useEffect } from "react";
-import { BASE_URL, ExpoIcon } from "../lib/constants";
+import { BASE_URL } from "../lib/constants";
 import { ErrorResponse } from "../lib/types";
 import { ProjectBuildsResponse, ProjectBuild } from "../lib/types/project-builds.types";
 import { getAuthHeaders, changeCase, humanDateTime } from "../lib/utils";
@@ -114,7 +114,7 @@ export default function ProjectBuilds({ appFullName }: { appFullName: string }) 
                     title="View on Expo"
                     url={getExpoLink(build.node)}
                     icon={{
-                      source: ExpoIcon,
+                      source: "expo.png",
                       mask: ImageMask.Circle,
                     }}
                   />
