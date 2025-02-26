@@ -1,4 +1,4 @@
-import { ActionPanel, List, Action, Image, showToast, Toast, Icon, ImageMask, environment } from "@raycast/api";
+import { ActionPanel, List, Action, Image, showToast, Toast, Icon, ImageMask } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 import { BASE_URL } from "./lib/constants";
@@ -11,7 +11,6 @@ import AccountPicker from "./components/AccountPicker";
 import { ProjectsResponse } from "./lib/types/projects.types";
 import AuthWrapper from "./components/AuthWrapper";
 import useAuth from "./hooks/useAuth";
-import { dummyProjects } from "./lib/dummy";
 
 export default function Command() {
   const [accountName, setAccountName] = useState("");
