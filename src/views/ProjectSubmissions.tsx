@@ -1,14 +1,14 @@
 import { showToast, Toast, Color, List, Icon, ActionPanel, Action, ImageMask } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { useState, useEffect } from "react";
 import { BASE_URL } from "../lib/constants";
 import { ErrorResponse } from "../lib/types";
-import { getAuthHeaders, changeCase, humanDateTime } from "../lib/utils";
+import { changeCase, humanDateTime, isObjectEmpty } from "../lib/utils";
 import { ProjectSubmission, ProjectSubmissionResponse } from "../lib/types/project-submissions.types";
 import Submission from "./SubmissionDetails";
+import useAuth from "../hooks/useAuth";
 
 export default function ProjectSubmissions({ appFullName }: { appFullName: string }) {
-  const [headers, setHeaders] = useState<Record<string, string> | null>(null);
+  const { authHeaders } = useAuth();
 
   const ProjectSubmissionsPayload = JSON.stringify([
     {
@@ -25,8 +25,8 @@ export default function ProjectSubmissions({ appFullName }: { appFullName: strin
   const { isLoading, data } = useFetch(BASE_URL, {
     body: ProjectSubmissionsPayload,
     method: "post",
-    headers: headers || {},
-    execute: headers === null ? false : true,
+    headers: authHeaders,
+    execute: !isObjectEmpty(authHeaders),
     parseResponse: async (resp) => {
       const data = (await resp.json()) as ProjectSubmissionResponse;
       if ("errors" in data) {
@@ -47,14 +47,6 @@ export default function ProjectSubmissions({ appFullName }: { appFullName: strin
     },
     initialData: [],
   });
-
-  useEffect(() => {
-    async function fetchHeaders() {
-      const authHeaders = await getAuthHeaders();
-      setHeaders(authHeaders);
-    }
-    fetchHeaders();
-  }, []);
 
   function getTintColor(submission: ProjectSubmission) {
     if (submission.submissionStatus === "FINISHED") {

@@ -1,16 +1,16 @@
 import { showToast, Toast, Color, List, Icon, ActionPanel, Action } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { useState, useEffect } from "react";
 import { BASE_URL } from "../lib/constants";
 import { ErrorResponse } from "../lib/types";
-import { getAuthHeaders, changeCase, humanDateTime } from "../lib/utils";
+import { changeCase, humanDateTime, isObjectEmpty } from "../lib/utils";
 import BuildDetails from "./BuildDetails";
 import Submission from "./SubmissionDetails";
 import UpdateGroup from "./UpdateDetails";
 import { ProjectTimelineResponse, ProjectActivity } from "../lib/types/projects.types";
+import useAuth from "../hooks/useAuth";
 
 export default function ProjectTimeline({ appFullName }: { appFullName: string }) {
-  const [headers, setHeaders] = useState<Record<string, string> | null>(null);
+  const { authHeaders } = useAuth();
 
   const ProjectTimelinePayload = JSON.stringify([
     {
@@ -30,8 +30,8 @@ export default function ProjectTimeline({ appFullName }: { appFullName: string }
   const { isLoading, data } = useFetch(BASE_URL, {
     body: ProjectTimelinePayload,
     method: "post",
-    headers: headers || {},
-    execute: headers === null ? false : true,
+    headers: authHeaders,
+    execute: !isObjectEmpty(authHeaders),
     parseResponse: async (resp) => {
       const data = (await resp.json()) as ProjectTimelineResponse;
       if ("errors" in data) {
@@ -52,14 +52,6 @@ export default function ProjectTimeline({ appFullName }: { appFullName: string }
     },
     initialData: [],
   });
-
-  useEffect(() => {
-    async function fetchHeaders() {
-      const authHeaders = await getAuthHeaders();
-      setHeaders(authHeaders);
-    }
-    fetchHeaders();
-  }, []);
 
   function setTintColor(activity: ProjectActivity) {
     if (activity.__typename === "Build") {
