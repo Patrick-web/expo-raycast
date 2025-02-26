@@ -1,8 +1,7 @@
-import { ActionPanel, List, Action, Image, showToast, Toast, Icon, ImageMask } from "@raycast/api";
+import { ActionPanel, List, Action, Image, showToast, Toast, Icon, ImageMask, environment } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { BASE_URL } from "./lib/constants";
-import { getAuthHeaders } from "./lib/utils";
 import { ErrorResponse } from "./lib/types";
 import ProjectBuilds from "./views/ProjectBuilds";
 import ProjectTimeline from "./views/ProjectTimeline";
@@ -10,11 +9,14 @@ import ProjectSubmissions from "./views/ProjectSubmissions";
 import ProjectUpdates from "./views/ProjectUpdates";
 import AccountPicker from "./components/AccountPicker";
 import { ProjectsResponse } from "./lib/types/projects.types";
+import AuthWrapper from "./components/AuthWrapper";
+import useAuth from "./hooks/useAuth";
+import { dummyProjects } from "./lib/dummy";
 
 export default function Command() {
-  const [headers, setHeaders] = useState<Record<string, string> | null>(null);
-
   const [accountName, setAccountName] = useState("");
+
+  const { authHeaders } = useAuth();
 
   const ProjectsPayload = JSON.stringify([
     {
@@ -33,8 +35,8 @@ export default function Command() {
   const { isLoading, data } = useFetch(BASE_URL, {
     body: ProjectsPayload,
     method: "post",
-    headers: headers || {},
-    execute: headers === null && !accountName ? false : true,
+    headers: authHeaders,
+    execute: accountName ? true : false,
     parseResponse: async (resp) => {
       const data = (await resp.json()) as ProjectsResponse;
       if ("errors" in data) {
@@ -56,83 +58,77 @@ export default function Command() {
     initialData: [],
   });
 
-  useEffect(() => {
-    async function init() {
-      const authHeaders = await getAuthHeaders();
-      setHeaders(authHeaders);
-    }
-    init();
-  }, []);
-
   return (
-    <List
-      isLoading={isLoading}
-      navigationTitle="Expo Projects"
-      searchBarPlaceholder="Search Projects"
-      searchBarAccessory={<AccountPicker onPick={(acc) => setAccountName(acc.name)} />}
-    >
-      {data ? (
-        <>
-          {data.map((project) => (
-            <List.Item
-              key={project.node.id}
-              icon={
-                project.node.iconUrl
-                  ? {
-                      source: project.node.iconUrl,
-                      mask: Image.Mask.Circle,
-                    }
-                  : Icon.MemoryChip
-              }
-              title={project.node.name}
-              actions={
-                <ActionPanel>
-                  <Action.Push
-                    title="View Activity"
-                    target={<ProjectTimeline appFullName={project.node.fullName} />}
-                    icon={Icon.LineChart}
-                  />
-                  <Action.Push
-                    title="View Builds"
-                    target={<ProjectBuilds appFullName={project.node.fullName} />}
-                    icon={Icon.HardDrive}
-                  />
-                  <Action.Push
-                    title="View Submissions"
-                    target={<ProjectSubmissions appFullName={project.node.fullName} />}
-                    icon={Icon.Leaf}
-                  />
-                  <Action.Push
-                    title="View Updates"
-                    target={<ProjectUpdates appFullName={project.node.fullName} />}
-                    icon={Icon.Layers}
-                  />
-                  <Action.OpenInBrowser
-                    title="Open on Expo"
-                    url={`https://expo.dev/accounts/${project.node.fullName}`}
-                    icon={{
-                      source: "expo.png",
-                      mask: ImageMask.Circle,
-                    }}
-                  />
-                  {project.node.githubRepository && (
+    <AuthWrapper>
+      <List
+        isLoading={isLoading}
+        navigationTitle="Expo Projects"
+        searchBarPlaceholder="Search Projects"
+        searchBarAccessory={<AccountPicker onPick={(acc) => setAccountName(acc.name)} />}
+      >
+        {data ? (
+          <>
+            {data.map((project) => (
+              <List.Item
+                key={project.node.id}
+                icon={
+                  project.node.iconUrl
+                    ? {
+                        source: project.node.iconUrl,
+                        mask: Image.Mask.Circle,
+                      }
+                    : Icon.MemoryChip
+                }
+                title={project.node.name}
+                actions={
+                  <ActionPanel>
+                    <Action.Push
+                      title="View Activity"
+                      target={<ProjectTimeline appFullName={project.node.fullName} />}
+                      icon={Icon.LineChart}
+                    />
+                    <Action.Push
+                      title="View Builds"
+                      target={<ProjectBuilds appFullName={project.node.fullName} />}
+                      icon={Icon.HardDrive}
+                    />
+                    <Action.Push
+                      title="View Submissions"
+                      target={<ProjectSubmissions appFullName={project.node.fullName} />}
+                      icon={Icon.Leaf}
+                    />
+                    <Action.Push
+                      title="View Updates"
+                      target={<ProjectUpdates appFullName={project.node.fullName} />}
+                      icon={Icon.Layers}
+                    />
                     <Action.OpenInBrowser
-                      title="Open on GitHub"
-                      url={project.node.githubRepository}
+                      title="Open on Expo"
+                      url={`https://expo.dev/accounts/${project.node.fullName}`}
                       icon={{
-                        source: "github.png",
+                        source: "expo.png",
                         mask: ImageMask.Circle,
                       }}
                     />
-                  )}
-                </ActionPanel>
-              }
-            />
-          ))}
-        </>
-      ) : (
-        <List.EmptyView />
-      )}
-    </List>
+                    {project.node.githubRepository && (
+                      <Action.OpenInBrowser
+                        title="Open on GitHub"
+                        url={project.node.githubRepository}
+                        icon={{
+                          source: "github.png",
+                          mask: ImageMask.Circle,
+                        }}
+                      />
+                    )}
+                  </ActionPanel>
+                }
+              />
+            ))}
+          </>
+        ) : (
+          <List.EmptyView />
+        )}
+      </List>
+    </AuthWrapper>
   );
 }
