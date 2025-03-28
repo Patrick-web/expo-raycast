@@ -1,4 +1,4 @@
-import { showToast, Toast, Color, List, Icon, ActionPanel, Action, ImageMask } from "@raycast/api";
+import { showToast, Toast, Color, List, Icon, ActionPanel, Action } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { BASE_URL } from "../lib/constants";
 import { ErrorResponse } from "../lib/types";
@@ -6,8 +6,9 @@ import { changeCase, humanDateTime, isObjectEmpty } from "../lib/utils";
 import { ProjectSubmission, ProjectSubmissionResponse } from "../lib/types/project-submissions.types";
 import Submission from "./SubmissionDetails";
 import useAuth from "../hooks/useAuth";
+import { Project } from "../lib/types/projects.types";
 
-export default function ProjectSubmissions({ appFullName }: { appFullName: string }) {
+export default function ProjectSubmissions({ project }: { project: Project }) {
   const { authHeaders } = useAuth();
 
   const ProjectSubmissionsPayload = JSON.stringify([
@@ -15,7 +16,7 @@ export default function ProjectSubmissions({ appFullName }: { appFullName: strin
       operationName: "AppSubmissionsPaginatedQuery",
       variables: {
         first: 12,
-        projectFullName: appFullName,
+        projectFullName: project.fullName,
       },
       query:
         "query AppSubmissionsPaginatedQuery($projectFullName: String!, $after: String, $first: Int, $before: String, $last: Int) {\n  app {\n    byFullName(fullName: $projectFullName) {\n      id\n      submissionsPaginated(after: $after, first: $first, before: $before, last: $last) {\n        edges {\n          node {\n            ...TableSubmission\n            __typename\n          }\n          __typename\n        }\n        pageInfo {\n          hasNextPage\n          hasPreviousPage\n          startCursor\n          endCursor\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment TableSubmission on Submission {\n  id\n  __typename\n  activityTimestamp\n  createdAt\n  initiatingActor {\n    id\n    __typename\n    displayName\n    ... on UserActor {\n      profilePhoto\n      __typename\n    }\n    ... on Robot {\n      isManagedByGitHubApp\n      __typename\n    }\n  }\n  app {\n    ...AppData\n    __typename\n  }\n  submittedBuild {\n    id\n    appVersion\n    __typename\n  }\n  submissionPlatform: platform\n  submissionStatus: status\n}\n\nfragment AppData on App {\n  __typename\n  id\n  icon {\n    url\n    primaryColor\n    __typename\n  }\n  iconUrl\n  fullName\n  name\n  slug\n  ownerAccount {\n    name\n    id\n    __typename\n  }\n  githubRepository {\n    githubRepositoryUrl\n    __typename\n  }\n  lastDeletionAttemptTime\n}",
@@ -35,7 +36,9 @@ export default function ProjectSubmissions({ appFullName }: { appFullName: strin
         return [];
       }
 
-      return data[0].data.app.byFullName?.submissionsPaginated.edges || [];
+      const submissions = data[0].data.app.byFullName?.submissionsPaginated.edges.map((edge) => edge.node);
+
+      return submissions || [];
     },
     onError: (error) => {
       console.log(error);
@@ -82,19 +85,19 @@ export default function ProjectSubmissions({ appFullName }: { appFullName: strin
         <>
           {data.map((submission) => (
             <List.Item
-              id={submission.node.id}
-              key={submission.node.id}
+              id={submission.id}
+              key={submission.id}
               icon={{
                 source: Icon.Leaf,
-                tintColor: getTintColor(submission.node),
+                tintColor: getTintColor(submission),
               }}
-              title={getTitle(submission.node)}
-              subtitle={humanDateTime(new Date(submission.node.activityTimestamp))}
+              title={getTitle(submission)}
+              subtitle={humanDateTime(new Date(submission.activityTimestamp))}
               accessories={[
                 {
                   tag: {
-                    value: getStatusTag(submission.node),
-                    color: getTintColor(submission.node),
+                    value: getStatusTag(submission),
+                    color: getTintColor(submission),
                   },
                 },
               ]}
@@ -102,15 +105,14 @@ export default function ProjectSubmissions({ appFullName }: { appFullName: strin
                 <ActionPanel>
                   <Action.Push
                     title="View Submission"
-                    target={<Submission submissionId={submission.node.id} />}
+                    target={<Submission submissionId={submission.id} />}
                     icon={Icon.Box}
                   />
                   <Action.OpenInBrowser
                     title="View on Expo"
-                    url={getExpoLink(submission.node)}
+                    url={getExpoLink(submission)}
                     icon={{
                       source: "expo.png",
-                      mask: ImageMask.Circle,
                     }}
                   />
                 </ActionPanel>

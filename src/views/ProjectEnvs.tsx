@@ -118,6 +118,7 @@ export default function ProjectEnvs({ appFullName }: { appFullName: string }) {
 
         if ("errors" in data) {
           const errorMessages = (data as ErrorResponse).errors.map((error) => error.message).join(", ");
+
           showToast({
             title: "Error Fetching Project Enviroment Variables",
             message: errorMessages,

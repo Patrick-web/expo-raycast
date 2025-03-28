@@ -1,4 +1,4 @@
-import { showToast, Toast, Color, List, Icon, ActionPanel, Action, ImageMask } from "@raycast/api";
+import { showToast, Toast, Color, List, Icon, ActionPanel, Action } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { BASE_URL } from "../lib/constants";
 import { ErrorResponse } from "../lib/types";
@@ -6,15 +6,16 @@ import { ProjectBuildsResponse, ProjectBuild } from "../lib/types/project-builds
 import { changeCase, humanDateTime, isObjectEmpty } from "../lib/utils";
 import BuildDetails from "./BuildDetails";
 import useAuth from "../hooks/useAuth";
+import { Project } from "../lib/types/projects.types";
 
-export default function ProjectBuilds({ appFullName }: { appFullName: string }) {
+export default function ProjectBuilds({ project }: { project: Project }) {
   const { authHeaders } = useAuth();
 
   const ProjectBuildsPayload = JSON.stringify([
     {
       operationName: "BuildsPaginatedQuery",
       variables: {
-        fullName: appFullName,
+        fullName: project.fullName,
         first: 12,
         filter: {
           platforms: null,
@@ -38,7 +39,9 @@ export default function ProjectBuilds({ appFullName }: { appFullName: string }) 
         return [];
       }
 
-      return data[0].data.app.byFullName?.buildsPaginated.edges || [];
+      const builds = data[0].data.app.byFullName?.buildsPaginated.edges.map((item) => item.node);
+
+      return builds;
     },
     onError: (error) => {
       console.log(error);
@@ -83,33 +86,34 @@ export default function ProjectBuilds({ appFullName }: { appFullName: string }) 
         <>
           {data.map((build) => (
             <List.Item
-              id={build.node.id}
-              key={build.node.id}
+              id={build.id}
+              key={build.id}
               icon={{
                 source: Icon.Hammer,
-                tintColor: setTintColor(build.node),
+                tintColor: setTintColor(build),
               }}
-              title={getTitle(build.node)}
-              subtitle={humanDateTime(new Date(build.node.activityTimestamp))}
+              title={getTitle(build)}
+              subtitle={humanDateTime(new Date(build.activityTimestamp))}
               accessories={[
                 {
                   tag: {
-                    value: getStatusTag(build.node),
-                    color: setTintColor(build.node),
+                    value: getStatusTag(build),
+                    color: setTintColor(build),
                   },
                 },
               ]}
               actions={
                 <ActionPanel>
-                  <Action.Push title="View Build" target={<BuildDetails buildId={build.node.id} />} icon={Icon.Box} />
-                  <Action.OpenInBrowser
-                    title="View on Expo"
-                    url={getExpoLink(build.node)}
-                    icon={{
-                      source: "expo.png",
-                      mask: ImageMask.Circle,
-                    }}
-                  />
+                  <Action.Push title="View Build" target={<BuildDetails buildId={build.id} />} icon={Icon.Box} />
+                  {build && (
+                    <Action.OpenInBrowser
+                      title="View on Expo"
+                      url={getExpoLink(build)}
+                      icon={{
+                        source: "expo.png",
+                      }}
+                    />
+                  )}
                 </ActionPanel>
               }
             />

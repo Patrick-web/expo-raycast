@@ -6,15 +6,16 @@ import { humanDateTime, isObjectEmpty } from "../lib/utils";
 import { ProjectUpdate, ProjectUpdatesResponse } from "../lib/types/project-updates.types";
 import UpdateGroup from "./UpdateDetails";
 import useAuth from "../hooks/useAuth";
+import { Project } from "../lib/types/projects.types";
 
-export default function ProjectBuilds({ appFullName }: { appFullName: string }) {
+export default function ProjectBuilds({ project }: { project: Project }) {
   const { authHeaders } = useAuth();
 
   const ProjectUpdatesPayload = JSON.stringify([
     {
       operationName: "UpdatesPaginated",
       variables: {
-        fullName: appFullName,
+        fullName: project.fullName,
         first: 30,
       },
       query:

@@ -91,18 +91,18 @@ export default function Command() {
                     />
                     <Action.Push
                       title="View Builds"
-                      target={<ProjectBuilds appFullName={project.fullName} />}
+                      target={<ProjectBuilds project={project} />}
                       icon={Icon.HardDrive}
                     />
                     <Action.Push
                       title="View Submissions"
-                      target={<ProjectSubmissions appFullName={project.fullName} />}
+                      target={<ProjectSubmissions project={project} />}
                       icon={Icon.Leaf}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
                     />
                     <Action.Push
                       title="View Updates"
-                      target={<ProjectUpdates appFullName={project.fullName} />}
+                      target={<ProjectUpdates project={project} />}
                       icon={Icon.Layers}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
                     />
@@ -130,7 +130,7 @@ export default function Command() {
             ))}
           </>
         ) : (
-          <List.EmptyView />
+          <List.EmptyView title="No projects found" />
         )}
       </List>
     </AuthWrapper>
