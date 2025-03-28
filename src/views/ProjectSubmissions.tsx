@@ -78,7 +78,7 @@ export default function ProjectSubmissions({ appFullName }: { appFullName: strin
 
   return (
     <List isLoading={isLoading} navigationTitle="Submissions">
-      {data ? (
+      {data && data.length > 0 ? (
         <>
           {data.map((submission) => (
             <List.Item

@@ -67,7 +67,7 @@ export default function Command() {
         searchBarPlaceholder="Search Projects"
         searchBarAccessory={<AccountPicker onPick={(acc) => setAccountName(acc.name)} />}
       >
-        {data ? (
+        {data && data.length > 0 ? (
           <>
             {data.map((project) => (
               <List.Item

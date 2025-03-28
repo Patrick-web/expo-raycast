@@ -153,7 +153,7 @@ export default function ProjectEnvs({ appFullName }: { appFullName: string }) {
         </ActionPanel>
       }
     >
-      {data ? (
+      {data && data.length > 0 ? (
         <>
           {data.map((env) => (
             <List.Item

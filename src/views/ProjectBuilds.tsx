@@ -79,7 +79,7 @@ export default function ProjectBuilds({ appFullName }: { appFullName: string }) 
 
   return (
     <List isLoading={isLoading} navigationTitle="Builds">
-      {data ? (
+      {data && data.length > 0 ? (
         <>
           {data.map((build) => (
             <List.Item

@@ -96,7 +96,7 @@ export default function ProjectTimeline({ project }: { project: Project }) {
 
   return (
     <List isLoading={isLoading} navigationTitle="Project Activity">
-      {data ? (
+      {data && data.length > 0 ? (
         <>
           {data.map((project) => (
             <List.Item

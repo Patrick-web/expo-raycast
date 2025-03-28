@@ -55,7 +55,7 @@ export default function ProjectBuilds({ appFullName }: { appFullName: string }) 
 
   return (
     <List isLoading={isLoading} navigationTitle="Updates">
-      {data ? (
+      {data && data.length > 0 ? (
         <>
           {data.map((update) => (
             <List.Item
