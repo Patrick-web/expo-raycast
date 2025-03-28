@@ -1,16 +1,19 @@
 import { Form, ActionPanel, Action, showToast, Toast, LocalStorage, useNavigation } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { BASE_URL, baseHeaders } from "../lib/constants";
 import { ErrorResponse } from "../lib/types";
 import { UsersResponse } from "../lib/types/users-types.types";
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import Projects from "../manage-projects";
 import useAuth from "../hooks/useAuth";
+
+const OTP_ERROR_CODE = "ONE_TIME_PASSWORD_REQUIRED";
 
 interface Payload {
   email: string;
   password: string;
+  otp: string;
 }
 
 interface SuccessLogin {
@@ -21,7 +24,11 @@ interface SuccessLogin {
 
 type LoginResponse = SuccessLogin | ErrorResponse;
 
-export default function LoginForm({ destination = Projects as any }: { destination?: ReactNode }) {
+export default function LoginForm({ destination }: { destination?: ReactNode }) {
+  const [formState, setFormState] = useState<"static" | "loading">("static");
+
+  const [requiresOTP, setRequiresOTP] = useState(false);
+
   const { getAuthHeaders } = useAuth();
 
   const { push } = useNavigation();
@@ -47,8 +54,9 @@ export default function LoginForm({ destination = Projects as any }: { destinati
     };
 
     try {
+      setFormState("loading");
       const resp = await axios.request<UsersResponse>(config);
-
+      setFormState("static");
       if ("errors" in resp.data) {
         const errorMessages = (resp.data as ErrorResponse).errors.map((error) => error.message).join(", ");
         showToast({ title: "Login Failed", message: errorMessages, style: Toast.Style.Failure });
@@ -60,27 +68,36 @@ export default function LoginForm({ destination = Projects as any }: { destinati
         toast.style = Toast.Style.Success;
         toast.title = "All setup";
         toast.message = "You can use the other commands";
-        push(destination);
+        push(destination ?? <Projects />);
       }
     } catch (error) {
       console.log(error);
       showToast({ title: "Error setting up", message: (error as Error)?.message || "", style: Toast.Style.Failure });
     }
+    setFormState("static");
   }
 
   const { handleSubmit } = useForm<Payload>({
     onSubmit: async (values) => {
+      setFormState("loading");
       try {
         const resp = await axios.post<LoginResponse>(
           "https://api.expo.dev/v2/auth/loginAsync",
-          {
-            username: values.email,
-            password: values.password,
-          },
+          requiresOTP
+            ? {
+                username: values.email,
+                password: values.password,
+                otp: values.otp,
+              }
+            : {
+                username: values.email,
+                password: values.password,
+              },
           {
             headers: baseHeaders,
           },
         );
+        console.log("=========");
         console.log(resp.data);
 
         // check if succesful response or failed
@@ -93,14 +110,30 @@ export default function LoginForm({ destination = Projects as any }: { destinati
           showToast({ title: "Login Failed", message: errorMessages, style: Toast.Style.Failure });
         }
       } catch (error) {
+        const errorResponse = (error as AxiosError).response;
+        if (errorResponse && errorResponse.data) {
+          const errorData = errorResponse.data as ErrorResponse;
+          const errorCodes = errorData.errors.map((err) => err.code);
+
+          if (errorCodes.includes(OTP_ERROR_CODE)) {
+            setRequiresOTP(true);
+            return;
+          }
+        }
         console.log(error);
         showToast({ title: "Error logging in", style: Toast.Style.Failure });
       }
     },
-    validation: {
-      email: FormValidation.Required,
-      password: FormValidation.Required,
-    },
+    validation: requiresOTP
+      ? {
+          email: FormValidation.Required,
+          password: FormValidation.Required,
+          otp: FormValidation.Required,
+        }
+      : {
+          email: FormValidation.Required,
+          password: FormValidation.Required,
+        },
   });
 
   return (
@@ -111,9 +144,11 @@ export default function LoginForm({ destination = Projects as any }: { destinati
         </ActionPanel>
       }
       navigationTitle="Log into Expo Account"
+      isLoading={formState === "loading" ? true : false}
     >
       <Form.TextField id="email" title="Email" placeholder="john@doe.com" defaultValue="" />
       <Form.PasswordField id="password" title="Password" placeholder="******" defaultValue="" />
+      {requiresOTP && <Form.TextField id="otp" title="Enter your OTP" placeholder="******" defaultValue="" />}
     </Form>
   );
 }
