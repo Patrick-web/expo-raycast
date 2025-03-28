@@ -46,6 +46,7 @@ export default function Command() {
 
       const projects = data[0].data.account.byName.appsPaginated.edges.map((item) => item.node);
       console.log({ projects });
+      console.log(projects[0].githubRepository);
       return projects;
     },
     onError: (error) => {
@@ -107,20 +108,18 @@ export default function Command() {
                     />
                     <Action.OpenInBrowser
                       title="Open on Expo"
-                      url={`https://expo.dev/accounts/${project.fullName}`}
+                      url={`https://expo.dev/accounts/projects/${project.fullName}`}
                       icon={{
                         source: "expo.png",
-                        mask: ImageMask.Circle,
                       }}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
                     />
                     {project.githubRepository && (
                       <Action.OpenInBrowser
                         title="Open on GitHub"
-                        url={project.githubRepository}
+                        url={project.githubRepository.githubRepositoryUrl}
                         icon={{
                           source: "github.png",
-                          mask: ImageMask.Circle,
                         }}
                         shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
                       />
