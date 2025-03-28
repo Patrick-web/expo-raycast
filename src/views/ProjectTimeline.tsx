@@ -6,17 +6,17 @@ import { changeCase, humanDateTime, isObjectEmpty } from "../lib/utils";
 import BuildDetails from "./BuildDetails";
 import Submission from "./SubmissionDetails";
 import UpdateGroup from "./UpdateDetails";
-import { ProjectTimelineResponse, ProjectActivity } from "../lib/types/projects.types";
+import { ProjectTimelineResponse, ProjectActivity, Project } from "../lib/types/projects.types";
 import useAuth from "../hooks/useAuth";
 
-export default function ProjectTimeline({ appFullName }: { appFullName: string }) {
+export default function ProjectTimeline({ project }: { project: Project }) {
   const { authHeaders } = useAuth();
 
   const ProjectTimelinePayload = JSON.stringify([
     {
       operationName: "AppTimelineActivityQuery",
       variables: {
-        appFullName: appFullName,
+        appFullName: project.fullName,
         first: 10,
         filter: {
           types: ["BUILD", "SUBMISSION", "UPDATE", "WORKFLOW_RUN", "WORKER"],
@@ -90,7 +90,7 @@ export default function ProjectTimeline({ appFullName }: { appFullName: string }
   }
 
   function getExpoLink(activity: ProjectActivity) {
-    const link = `https://expo.dev/accounts/${activity.app.ownerAccount?.name}/projects/${activity.app.name}/${activity.__typename}s/${activity.id}`;
+    const link = `https://expo.dev/accounts/${project.ownerAccount?.name}/projects/${project.fullName}/${activity.__typename}s/${project.id}`;
     return link.toLowerCase();
   }
 

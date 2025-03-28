@@ -1,4 +1,4 @@
-import { ActionPanel, List, Action, Image, showToast, Toast, Icon, ImageMask } from "@raycast/api";
+import { ActionPanel, List, Action, Image, showToast, Toast, Icon, ImageMask, Keyboard } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 import { BASE_URL } from "./lib/constants";
@@ -44,7 +44,9 @@ export default function Command() {
         return [];
       }
 
-      return data[0].data.account.byName.appsPaginated.edges;
+      const projects = data[0].data.account.byName.appsPaginated.edges.map((item) => item.node);
+      console.log({ projects });
+      return projects;
     },
     onError: (error) => {
       console.log(error);
@@ -69,54 +71,58 @@ export default function Command() {
           <>
             {data.map((project) => (
               <List.Item
-                key={project.node.id}
+                key={project.id}
                 icon={
-                  project.node.iconUrl
+                  project.iconUrl
                     ? {
-                        source: project.node.iconUrl,
+                        source: project.iconUrl,
                         mask: Image.Mask.Circle,
                       }
                     : Icon.MemoryChip
                 }
-                title={project.node.name}
+                title={project.name}
                 actions={
                   <ActionPanel>
                     <Action.Push
                       title="View Activity"
-                      target={<ProjectTimeline appFullName={project.node.fullName} />}
+                      target={<ProjectTimeline project={project} />}
                       icon={Icon.LineChart}
                     />
                     <Action.Push
                       title="View Builds"
-                      target={<ProjectBuilds appFullName={project.node.fullName} />}
+                      target={<ProjectBuilds appFullName={project.fullName} />}
                       icon={Icon.HardDrive}
                     />
                     <Action.Push
                       title="View Submissions"
-                      target={<ProjectSubmissions appFullName={project.node.fullName} />}
+                      target={<ProjectSubmissions appFullName={project.fullName} />}
                       icon={Icon.Leaf}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
                     />
                     <Action.Push
                       title="View Updates"
-                      target={<ProjectUpdates appFullName={project.node.fullName} />}
+                      target={<ProjectUpdates appFullName={project.fullName} />}
                       icon={Icon.Layers}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
                     />
                     <Action.OpenInBrowser
                       title="Open on Expo"
-                      url={`https://expo.dev/accounts/${project.node.fullName}`}
+                      url={`https://expo.dev/accounts/${project.fullName}`}
                       icon={{
                         source: "expo.png",
                         mask: ImageMask.Circle,
                       }}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
                     />
-                    {project.node.githubRepository && (
+                    {project.githubRepository && (
                       <Action.OpenInBrowser
                         title="Open on GitHub"
-                        url={project.node.githubRepository}
+                        url={project.githubRepository}
                         icon={{
                           source: "github.png",
                           mask: ImageMask.Circle,
                         }}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
                       />
                     )}
                   </ActionPanel>
